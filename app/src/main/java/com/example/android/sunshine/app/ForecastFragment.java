@@ -1,6 +1,7 @@
 package com.example.android.sunshine.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -110,10 +111,15 @@ public class ForecastFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Context context = getActivity();
                 String message = parent.getItemAtPosition(position).toString();
-                int duration = Toast.LENGTH_SHORT;
+//                int duration = Toast.LENGTH_SHORT;
+//
+//                Toast toast = Toast.makeText(context, message, duration);
+//                toast.show();
 
-                Toast toast = Toast.makeText(context, message, duration);
-                toast.show();
+                Intent detailForecastIntent = new Intent(context, DetailActivity.class);
+                detailForecastIntent.putExtra(Intent.EXTRA_TEXT, message);
+
+                startActivity(detailForecastIntent);
             }
         });
 
