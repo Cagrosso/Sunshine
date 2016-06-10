@@ -2,8 +2,11 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,6 +47,25 @@ public class ForecastFragment extends Fragment {
     public ForecastFragment() {
     }
 
+    private void updateWeather(){
+        Context context = getActivity();
+
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+
+        ArrayList<String> passing = new ArrayList<String>();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String zip = preferences.getString(getString(R.string.pref_location_key), "");
+
+        passing.add(zip);
+
+        weatherTask.execute(passing);
+    }
+
+    private long metricToImperial(long celsius){
+        return celsius * (9/5) + 32;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,12 +88,7 @@ public class ForecastFragment extends Fragment {
             Toast toast = Toast.makeText(context, "Refresh Pressed", duration);
             toast.show();
 
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-
-            ArrayList<String> passing = new ArrayList<String>();
-            passing.add("27546");
-
-            weatherTask.execute(passing);
+            updateWeather();
 
             return true;
         }
@@ -80,22 +97,19 @@ public class ForecastFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        String[] data = {
-                "Mon 6/23 - Sunny - 31/17",
-                "Tue 6/24 - Foggy - 21/8",
-                "Wed 6/25 - Cloudy - 22/17",
-                "Thurs 6/26 - Rainy - 18/11",
-                "Fri 6/27 - Foggy - 21/10",
-                "Sat 6/28 - TRAPPED IN WEATHERSTATION - 23/18",
-                "Sun 6/29 - Sunny - 20/7"
-        };
 
-        ArrayList<String> weekForecast = new ArrayList<String>(Arrays.asList(data));
+        ArrayList<String> weekForecast = new ArrayList<String>();
 
         forecastAdapter = new ArrayAdapter<String>(getActivity(),
                 R.layout.list_item_forecast,
@@ -133,10 +147,17 @@ public class ForecastFragment extends Fragment {
         /**
          * Prepare the weather high/lows for presentation.
          */
-        private String formatHighLows(double high, double low) {
+        private String formatHighLows(double high, double low, String unitType) {
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
+
+            if(unitType.equals(getString(R.string.pref_units_imperial))){
+                roundedHigh = Math.round(metricToImperial(roundedHigh));
+                roundedLow = Math.round(metricToImperial(roundedLow));
+            }else if(!unitType.equals(getString(R.string.pref_units_metric))){
+                Log.e(LOG_TAG, "Unit type not found: " + unitType);
+            }
 
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
@@ -190,10 +211,18 @@ public class ForecastFragment extends Fragment {
                 // Temperatures are in a child object called "temp".  Try not to name variables
                 // "temp" when working with temperature.  It confuses everybody.
                 JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
+
+
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String unitType = preferences.getString(getString(
+                        R.string.pref_units_key),
+                        getString(R.string.pref_units_metric));
+
+
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
+                highAndLow = formatHighLows(high, low, unitType);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 

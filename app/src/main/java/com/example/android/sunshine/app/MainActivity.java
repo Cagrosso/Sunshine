@@ -1,6 +1,7 @@
 package com.example.android.sunshine.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -44,13 +45,17 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
 
         Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
+//        int duration = Toast.LENGTH_SHORT;
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast toast = Toast.makeText(context, "Settings Pressed", duration);
-            toast.show();
+//            Toast toast = Toast.makeText(context, "Settings Pressed", duration);
+//            toast.show();
+
+            Intent intent = new Intent(context, SettingsActivity.class);
+            startActivity(intent);
+
             return true;
         }
 

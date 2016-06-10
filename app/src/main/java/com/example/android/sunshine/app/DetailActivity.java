@@ -1,9 +1,8 @@
 package com.example.android.sunshine.app;
 
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,8 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -42,6 +39,9 @@ public class DetailActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+
             return true;
         }
 
@@ -70,8 +70,8 @@ public class DetailActivity extends AppCompatActivity {
             }
 
             return rootView;
-
         }
+
     }
 
 }
