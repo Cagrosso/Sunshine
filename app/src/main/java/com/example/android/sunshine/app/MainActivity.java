@@ -2,7 +2,11 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +17,18 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
+    private void showMap(Uri zipCode){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(zipCode);
+
+        if(intent.resolveActivity(this.getPackageManager()) != null){
+            startActivity(intent);
+        }else{
+            View view = getCurrentFocus();
+            Snackbar.make(view, "No Map application found", Snackbar.LENGTH_SHORT).setAction("", null).show();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +73,18 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
 
             return true;
+        }else if(id == R.id.action_map_view){
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+            String zipCode = preferences.getString(getString(
+                    R.string.pref_location_key),
+                    getString(R.string.pref_location_default));
+
+
+            Uri geolocation = Uri.parse("geo:0,0?").buildUpon()
+                    .appendQueryParameter("q", zipCode)
+                    .build();
+
+            showMap(geolocation);
         }
 
         return super.onOptionsItemSelected(item);

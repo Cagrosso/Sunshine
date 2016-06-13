@@ -7,8 +7,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.jar.Manifest;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -63,7 +67,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private long metricToImperial(long celsius){
-        return celsius * (9/5) + 32;
+        return (long) (celsius * 1.8 + 32);
     }
 
     @Override
@@ -125,10 +129,6 @@ public class ForecastFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Context context = getActivity();
                 String message = parent.getItemAtPosition(position).toString();
-//                int duration = Toast.LENGTH_SHORT;
-//
-//                Toast toast = Toast.makeText(context, message, duration);
-//                toast.show();
 
                 Intent detailForecastIntent = new Intent(context, DetailActivity.class);
                 detailForecastIntent.putExtra(Intent.EXTRA_TEXT, message);
@@ -153,8 +153,11 @@ public class ForecastFragment extends Fragment {
             long roundedLow = Math.round(low);
 
             if(unitType.equals(getString(R.string.pref_units_imperial))){
-                roundedHigh = Math.round(metricToImperial(roundedHigh));
-                roundedLow = Math.round(metricToImperial(roundedLow));
+                //Log.v(LOG_TAG, "High/Low Celsius: " + roundedHigh + "/" + roundedLow);
+                roundedHigh = metricToImperial(roundedHigh);
+                roundedLow = metricToImperial(roundedLow);
+
+                //Log.v(LOG_TAG, "High/Low Farenheit: " + roundedHigh + "/" + roundedLow);
             }else if(!unitType.equals(getString(R.string.pref_units_metric))){
                 Log.e(LOG_TAG, "Unit type not found: " + unitType);
             }
@@ -279,6 +282,7 @@ public class ForecastFragment extends Fragment {
                         .appendQueryParameter(APPID, BuildConfig.OPEN_WEATHER_MAP_API_KEY)
                         .build();
 
+                //Log.v(LOG_TAG, "URL: " + builder.toString());
 
                 URL url = new URL(builder.toString());
 
